@@ -217,6 +217,8 @@ main:focus{outline:none}
 .consent input{width:20px;height:20px;margin:3px 0 0;accent-color:var(--red)}
 .consent a{color:var(--accent-text)}
 .field>label.consent{font-weight:400}
+.result-note{color:var(--muted);margin-top:10px}
+.result-act{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
 .demo-note{font-size:14px;color:var(--muted);background:var(--surface);border-left:3px solid var(--graphite-2);padding:12px 14px;margin:18px 0}
 .form-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .result{border:1px solid var(--line);border-top:3px solid var(--ok);border-radius:var(--radius);padding:clamp(20px,3vw,32px);background:var(--bg)}
@@ -858,7 +860,7 @@ const UI = {
   ctaGuard:{ru:'Заказать охрану',kk:'Күзетке тапсырыс беру'},
   ctaProposal:{ru:'Получить коммерческое предложение',kk:'Коммерциялық ұсыныс алу'},
   protoTitle:{ru:'Прототип.',kk:'Прототип.'},
-  protoText:{ru:'Тексты — образцы для согласования. Данные в пунктирных рамках — заглушки. Форма работает в демо-режиме.',kk:'Мәтіндер — келісуге арналған үлгілер. Пунктирлі жақтаудағы деректер — уақытша толтырғыштар. Форма демо-режимде жұмыс істейді.'},
+  protoText:{ru:'Тексты — образцы для согласования. Данные в пунктирных рамках — заглушки. Заявка с формы уходит в WhatsApp компании.',kk:'Мәтіндер — келісуге арналған үлгілер. Пунктирлі жақтаудағы деректер — уақытша толтырғыштар. Форма өтінімі компанияның WhatsApp-ына жіберіледі.'},
   ftrCompany:{ru:'Компания',kk:'Компания'},
   ftrContact:{ru:'Связь',kk:'Байланыс'},
   call:{ru:'Позвонить',kk:'Қоңырау шалу'},
@@ -1086,11 +1088,14 @@ const F = {
   comment:{ru:'Комментарий',kk:'Түсініктеме'}, optional:{ru:'(необязательно)',kk:'(міндетті емес)'},
   commentPh:{ru:'Площадь, особенности объекта, желаемая дата начала',kk:'Аумағы, объектінің ерекшеліктері, жұмысты бастаудың қалаған күні'},
   consent:{ru:'Я согласен(на) на обработку персональных данных в соответствии с <a href="#privacy">Политикой конфиденциальности</a>',kk:'<a href="#privacy">Құпиялылық саясатына</a> сәйкес дербес деректерімді өңдеуге келісемін'},
-  demo:{ru:'<b>Демо-режим.</b> Форма проверяет поля, но никуда не отправляет и не сохраняет данные.',kk:'<b>Демо-режим.</b> Форма өрістерді тексереді, бірақ деректерді ешқайда жібермейді және сақтамайды.'},
-  submit:{ru:'Проверить заявку',kk:'Өтінімді тексеру'},
-  okTitle:{ru:'Проверка пройдена',kk:'Тексеруден өтті'},
-  okH:{ru:'Заявка заполнена верно',kk:'Өтінім дұрыс толтырылды'},
-  okP:{ru:'Это демонстрационная версия: заявка <strong>не отправлена и не сохранена</strong>. Ниже — данные в том виде, в каком их получит CRM после подключения backend.',kk:'Бұл демонстрациялық нұсқа: өтінім <strong>жіберілген жоқ және сақталған жоқ</strong>. Төменде — backend қосылғаннан кейін CRM алатын деректер.'},
+  demo:{ru:'Заявка придёт в WhatsApp ALAMIR SECURITY. После нажатия кнопки откроется WhatsApp с готовым сообщением — останется нажать «Отправить».',kk:'Өтінім ALAMIR SECURITY WhatsApp-ына келеді. Батырманы басқаннан кейін дайын хабарламасы бар WhatsApp ашылады — «Жіберу» батырмасын басу ғана қалады.'},
+  submit:{ru:'Отправить в WhatsApp',kk:'WhatsApp-қа жіберу'},
+  okTitle:{ru:'Почти готово',kk:'Аз қалды'},
+  okH:{ru:'Отправьте сообщение в WhatsApp',kk:'WhatsApp-та хабарламаны жіберіңіз'},
+  okP:{ru:`Мы открыли WhatsApp с вашей заявкой на номер ${COMPANY.phone.display}. Заявка дойдёт, когда вы нажмёте «Отправить» в WhatsApp.`,kk:`Өтініміңіз бар WhatsApp ${COMPANY.phone.display} нөміріне ашылды. WhatsApp-та «Жіберу» батырмасын басқанда өтінім жетеді.`},
+  okRetry:{ru:'Если WhatsApp не открылся — нажмите кнопку ниже или позвоните нам.',kk:'WhatsApp ашылмаса — төмендегі батырманы басыңыз немесе бізге қоңырау шалыңыз.'},
+  openWa:{ru:'Открыть WhatsApp',kk:'WhatsApp-ты ашу'},
+  noWa:{ru:'Позвоните нам, чтобы оставить заявку:',kk:'Өтінім қалдыру үшін бізге қоңырау шалыңыз:'},
   again:{ru:'Заполнить заново',kk:'Қайта толтыру'},
   e:{
     nameEmpty:{ru:'Укажите имя.',kk:'Атыңызды көрсетіңіз.'},
@@ -1467,6 +1472,7 @@ ${kzBar()}
     <h2>5. Хранение и защита</h2>
     <p>${PH('Срок хранения, место хранения данных, применяемые меры защиты')}</p>
     <h2>6. Передача третьим лицам</h2>
+    <p>Заявка с сайта не сохраняется на сайте: после нажатия кнопки у пользователя открывается WhatsApp с текстом заявки, и пользователь сам отправляет его на номер компании. Передача сообщения выполняется сервисом WhatsApp.</p>
     <p>Данные не передаются третьим лицам, за исключением случаев, предусмотренных законодательством Республики Казахстан. ${PH('Перечень сервисов-обработчиков: хостинг, CRM, аналитика')}</p>
     <h2>7. Права пользователя</h2>
     <p>Пользователь вправе запросить сведения о своих данных, потребовать их изменения или удаления и отозвать согласие на обработку.</p>
@@ -1618,40 +1624,69 @@ function bindForm(){
   });
 }
 
+/* Заявка уходит в WhatsApp компании: открываем чат с готовым текстом,
+   посетитель сам нажимает «Отправить». Сервер не нужен, данные на сайте не хранятся. */
+UI.waHeadRu = 'Заявка с сайта ALAMIR SECURITY';
+function leadText(lead){
+  const row = (k, v) => v ? `${k}: ${v}` : null;
+  return [
+    `*${UI.waHeadRu}*`,
+    row('Цель', lead.request_type_label),
+    row('Имя', lead.name),
+    row('Телефон', lead.phone),
+    row('Тип объекта', lead.object_type_label),
+    row('Адрес или район', lead.address),
+    row('Количество постов', lead.posts_label),
+    row('График охраны', lead.schedule_label),
+    row('Комментарий', lead.comment),
+    lead.lang === 'kk' ? 'Язык сайта: казахский' : null
+  ].filter(Boolean).join('\n');
+}
+const waLink = text => `https://wa.me/${COMPANY.phone.e164.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
+function openExternal(url){
+  /* ссылка с target=_blank внутри клика: браузер не блокирует, на телефоне открывается приложение */
+  const a = Object.assign(document.createElement('a'), { href:url, target:'_blank', rel:'noopener noreferrer' });
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
 function showResult(f){
   const g = n => (f.elements[n].value || '').trim();
   const lbl = (list, key) => { const x = list.find(i => i[0] === key); return x ? x[1].ru : key; };
   const svc = svcById(g('objectType'));
   const kind = (f.querySelector('input[name="requestType"]:checked') || {}).value || 'guard';
-  // Структура заявки для будущей передачи в CRM / n8n (сейчас нигде не сохраняется)
   const lead = {
-    source: 'website',
-    created_at: new Date().toISOString(),
     lang: LANG,
     request_type: kind,
     request_type_label: lbl(KINDS, kind),
     name: g('name'),
-    phone: '+' + g('phone').replace(/\D/g, ''),
+    phone: formatPhone(g('phone')),
     object_type: g('objectType'),
     object_type_label: svc ? svc.menu.ru : 'Другой объект',
     address: g('address'),
-    posts: g('posts'),
     posts_label: lbl(POSTS, g('posts')),
-    schedule: g('schedule'),
     schedule_label: lbl(SCHEDULES, g('schedule')),
-    comment: g('comment') || null,
-    consent: true
+    comment: g('comment') || null
   };
+  const wa = COMPANY.whatsapp.enabled ? waLink(leadText(lead)) : null;
+  if (wa) openExternal(wa);
   const slot = document.getElementById('form-slot');
-  slot.innerHTML = `
+  slot.innerHTML = wa ? `
 <div class="result" tabindex="-1" id="result">
-  <div class="ok">${icon('check')}${L(F.okTitle)}</div>
+  <div class="ok">${icon('chat')}${L(F.okTitle)}</div>
   <h3>${L(F.okH)}</h3>
   <p>${L(F.okP)}</p>
-  <pre><code id="lead-json"></code></pre>
-  <button class="btn btn-line" type="button" id="again">${L(F.again)}</button>
+  <p class="result-note">${L(F.okRetry)}</p>
+  <div class="cta-row result-act">
+    <a class="btn btn-red" href="${wa}" target="_blank" rel="noopener noreferrer">${icon('chat')}<span>${L(F.openWa)}</span></a>
+    <a class="btn btn-line" href="${telHref}">${icon('phone')}<span>${COMPANY.phone.display}</span></a>
+    <button class="btn btn-line" type="button" id="again">${L(F.again)}</button>
+  </div>
+</div>` : `
+<div class="result" tabindex="-1" id="result">
+  <h3>${L(F.noWa)}</h3>
+  <div class="cta-row result-act"><a class="btn btn-red" href="${telHref}">${icon('phone')}<span>${COMPANY.phone.display}</span></a>
+  <button class="btn btn-line" type="button" id="again">${L(F.again)}</button></div>
 </div>`;
-  document.getElementById('lead-json').textContent = JSON.stringify(lead, null, 2);
   const r = document.getElementById('result'); r.focus({ preventScroll:true }); r.scrollIntoView({ block:'nearest' });
   document.getElementById('again').addEventListener('click', () => {
     slot.innerHTML = formInner(lead.object_type, lead.request_type);
