@@ -282,6 +282,9 @@ main:focus{outline:none}
 .contact-list li:last-child{border-bottom:1px solid var(--line)}
 .contact-list svg{width:24px;height:24px;stroke:var(--red);fill:none;stroke-width:1.6;margin-top:3px}
 .contact-list b{display:block;font-weight:600}
+.addr-links{margin:8px 0 0;font-weight:600}
+.addr-links a{color:var(--accent-text)}
+.darkctx .addr-links a,footer .addr-links a{color:#F2545F}
 .notice{border:1px dashed #8F898A;background:rgba(143,137,138,.1);padding:16px 18px;border-radius:var(--radius);color:var(--text);margin-bottom:32px;font-size:15px}
 
 /* ====== Футер ====== */
@@ -1322,6 +1325,7 @@ ${theftSection()}
     <div class="faq">${FAQ.map(f=>`<details><summary>${L(f[0])}<span class="pm" aria-hidden="true">+</span></summary><div class="ans"><p>${f[1]()}</p></div></details>`).join('')}</div>
   </div>
 </section>
+${gtaSection()}
 ${formBlock('', false)}`;
   },
 
@@ -1430,7 +1434,7 @@ ${formBlock('', false)}`;
       <li>${icon('phone')}<div><b>${t('rPhone')}</b><a class="clink" href="${telHref}">${COMPANY.phone.display}</a></div></li>
       <li>${icon('mail')}<div><b>${t('rMail')}</b><a class="clink" href="${mailHref}">${COMPANY.email}</a></div></li>
       ${COMPANY.whatsapp.enabled ? `<li>${icon('chat')}<div><b>WhatsApp</b><a class="clink" href="${COMPANY.whatsapp.url}" target="_blank" rel="noopener noreferrer">${COMPANY.phone.display}</a></div></li>` : ''}
-      <li>${icon('pin')}<div><b>${t('rAddr')}</b>${L(COMPANY.legalAddress)}</div></li>
+      <li>${icon('pin')}<div><b>${t('rAddr')}</b>${L(COMPANY.legalAddress)}<p class="addr-links">${addrLinks()}</p></div></li>
       <li>${icon('clock')}<div><b>${t('rHours')}</b>${COMPANY.hours ? L(COMPANY.hours) : PH(UI.rHoursPh)}</div></li>
     </ul>
   </div>
@@ -1685,7 +1689,8 @@ function buildChrome(){
     <li><a href="${telHref}">${COMPANY.phone.display}</a></li>
     <li><a href="${mailHref}">${COMPANY.email}</a></li>
     ${COMPANY.whatsapp.enabled ? `<li><a href="${COMPANY.whatsapp.url}" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>` : ''}
-    <li>${L(COMPANY.legalAddress)}</li>`;
+    <li>${L(COMPANY.legalAddress)}</li>
+    <li class="addr-links">${addrLinks()}</li>`;
   document.getElementById('ftr-copy').textContent = `© 2026 ${L(COMPANY.shortName)}, ${t('rBin')} ${COMPANY.bin}`;
 }
 
@@ -3418,6 +3423,8 @@ Object.assign(UI, {
   gLoading:{ru:'Загружаем карту',kk:'Карта жүктелуде'},
   gFail:{ru:'Карта недоступна — выберите адрес из списка',kk:'Карта қолжетімсіз — мекенжайды тізімнен таңдаңыз'},
   gRoute:{ru:'Маршрут',kk:'Бағыт'},
+  gRouteLink:{ru:'Маршрут в 2ГИС',kk:'2ГИС-тегі бағыт'},
+  gOnMap:{ru:'Показать на карте',kk:'Картадан көрсету'},
   gRouteAria:{ru:'Маршрут в 2ГИС (откроется в новой вкладке)',kk:'2ГИС-тегі бағыт (жаңа бетте ашылады)'},
   gRadar:{ru:'Мини-радар: адрес на карте',kk:'Шағын радар: картадағы мекенжай'},
   gTipWheel:{ru:'Колесо мыши не приближает карту — используйте кнопки «+» и «−».',kk:'Тышқан дөңгелегі картаны жақындатпайды — «+» және «−» батырмаларын қолданыңыз.'}
@@ -3436,6 +3443,8 @@ function gtaTips(){
   ].filter(Boolean).map(L);
 }
 
+/* «Маршрут в 2ГИС · Показать на карте» — под адресом в подвале и в контактах */
+const addrLinks = (o = OFFICE_LOCS[0]) => `<a href="${o.route}" target="_blank" rel="noopener noreferrer" aria-label="${t('gRouteAria')}">${t('gRouteLink')}</a> · <a href="#contacts/${o.id}">${t('gOnMap')}</a>`;
 const gtaLL = (lat, lng) => `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'} · ${Math.abs(lng).toFixed(4)}° ${lng >= 0 ? 'E' : 'W'}`;
 const gtaArrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
@@ -3606,7 +3615,8 @@ const GMAP = {
     st.sel = id;
     this.paint(st);
     if (fly && st.ready) st.map.flyTo([o.lat, o.lng], GMAP_CFG.locZoom, reduced() ? { animate:false } : { duration:2.4, easeLinearity:.2 });
-    if (user && push && location.hash !== `#contacts/${id}`) history.pushState(null, '', `#contacts/${id}`);
+    const h = `#${renderedKey}/${id}`;
+    if (user && push && location.hash !== h) history.pushState(null, '', h);
     this.card(st, o);
     if (user){ const c = st.root.parentElement.querySelector('#gta-card'); requestAnimationFrame(() => c.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block:'center' })); }
   },
@@ -3614,7 +3624,7 @@ const GMAP = {
   /* «назад»/«вперёд»: true — обработано без перерисовки страницы */
   fromRoute(sub){
     if (!this.st) return false;
-    if (this.has(sub)){ this.select(sub, { push:false }); return true; }
+    if (this.has(sub)){ this.select(sub, { push:false }); scrollToId('gta-sec'); return true; }
     if (!sub) return true;
     return false;
   },
