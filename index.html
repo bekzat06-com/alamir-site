@@ -456,8 +456,8 @@ h1,h2{overflow-wrap:break-word;hyphens:auto}
   .hero-fallback{align-items:flex-start;justify-content:center;padding-top:20px}
   .hero-fallback .hero-art{width:100%;opacity:.5}
   .hero-fallback figcaption{display:none}
-  .hero-copy{padding:140px 0 80px}
-  .hero-ctrl{left:12px;right:12px;justify-content:flex-start}
+  .hero-copy{padding:150px 0 40px}
+  .hero-ctrl{left:12px;right:12px;top:12px;bottom:auto;justify-content:flex-start}
   .chip3d{padding:8px 10px;font-size:13px}
 }
 
@@ -503,6 +503,7 @@ h1,h2{overflow-wrap:break-word;hyphens:auto}
 .mk:hover .mk-ic svg,.mk.on .mk-ic svg{fill:#fff}
 .mk.far .mk-tx{display:none}
 .mk.far{padding:6px 7px}
+.mk.occl{visibility:hidden}
 .mk-car{cursor:default;border-left-color:#fff}
 .mk.dg{position:relative;transform:translate(-50%,-100%)}
 .dg-hide-mk .mk.dg{opacity:0;transform:translate(-50%,-80%)}
@@ -2726,6 +2727,20 @@ function buildMap(host){
 
   /* метки объектов над картой (HTML) */
   let labels = null;
+  /* Панели HUD поверх карты: метку, которая под них попадает, прячем. */
+  let occRects = [];
+  function readOcclusion(){
+    const view = labels.parentElement, base = labels.getBoundingClientRect();
+    occRects = [...view.querySelectorAll('.hud-title, .hud-filters, .hud-tr, .hud-r, .hud-bl, .hud-br, .map-card:not([hidden])')]
+      .map(e => e.getBoundingClientRect())
+      .filter(r => r.width > 0 && r.height > 0)
+      .map(r => ({ l:r.left - base.left, t:r.top - base.top, r:r.right - base.left, b:r.bottom - base.top }));
+  }
+  function placeLabel(el, p){
+    el.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%,-100%)`;
+    const w = el.offsetWidth, h = el.offsetHeight, l = p.x - w/2, t = p.y - h;
+    el.classList.toggle('occl', occRects.some(r => l < r.r && l + w > r.l && t < r.b && t + h > r.t));
+  }
   const tmpV = new THREE.Vector3();
   function project(x, y, z){ tmpV.set(x, y, z).project(cam); const w = st.host.clientWidth, h = st.host.clientHeight; return { ok:tmpV.z < 1 && Math.abs(tmpV.x) < 1.15 && Math.abs(tmpV.y) < 1.15, x:(tmpV.x + 1)/2*w, y:(1 - tmpV.y)/2*h }; }
 
@@ -2821,19 +2836,20 @@ function buildMap(host){
     /* HTML-метки */
     if (labels && st.host){
       const far = v.r > 3000;
+      if (frame % 10 === 0) readOcclusion();
       markers.forEach(m => {
         const el = labels.querySelector(`[data-obj="${m.o.id}"]`); if (!el) return;
         const p = project(m.o.x, m.head.position.y + 26, m.o.z);
         const show = p.ok && m.g.visible && m.appear > .6;
         el.style.display = show ? '' : 'none';
-        if (show){ el.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%,-100%)`; el.classList.toggle('far', far); el.classList.toggle('on', MAPC.isSel(m.o)); }
+        if (show){ el.classList.toggle('far', far); el.classList.toggle('on', MAPC.isSel(m.o)); placeLabel(el, p); }
       });
       const pl = labels.querySelector('[data-patrol-label]');
       if (pl){
         const sp = MAPC.selPatrol();
         const p = sp ? project(sp.x, 12, sp.z) : null;
         pl.style.display = p && p.ok ? '' : 'none';
-        if (p && p.ok) pl.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%,-100%)`;
+        if (p && p.ok) placeLabel(pl, p);
       }
     }
     if (frame % 2 === 0) MAPC.drawMini(v, patrols, markers);
